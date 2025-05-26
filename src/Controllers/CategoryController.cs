@@ -24,14 +24,16 @@ namespace ProductsApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
-            return await _context.Categories.ToListAsync();
+            return await _context.Categories.Include(c => c.Products).ToListAsync();
         }
 
         // GET: api/Category/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public async Task<ActionResult<Category>> GetCategory(long id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.Categories
+            .Include(c => c.Products)
+            .FirstOrDefaultAsync(c => c.Id == id);
 
             if (category == null)
             {
@@ -44,7 +46,7 @@ namespace ProductsApi.Controllers
         // PUT: api/Category/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutCategory(long id, Category category)
         {
             if (id != category.Id)
             {
@@ -85,7 +87,7 @@ namespace ProductsApi.Controllers
 
         // DELETE: api/Category/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        public async Task<IActionResult> DeleteCategory(long id)
         {
             var category = await _context.Categories.FindAsync(id);
             if (category == null)
@@ -99,7 +101,7 @@ namespace ProductsApi.Controllers
             return NoContent();
         }
 
-        private bool CategoryExists(int id)
+        private bool CategoryExists(long id)
         {
             return _context.Categories.Any(e => e.Id == id);
         }
